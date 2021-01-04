@@ -1,7 +1,7 @@
 $ScriptStartTime = Get-Date
 
 try {
-  Import-Module ..\Invoke-SqlCmd2
+  Import-Module .\Invoke-SqlCmd2
 }
 catch {
   Write-Error "Could not import Invoke-SqlCmd2.`n$($_.Exception.Message)" 
