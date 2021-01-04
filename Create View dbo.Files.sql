@@ -1,0 +1,9 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[Files]
+AS
+    SELECT DISTINCT [SourceFile]
+    from dbo.FileCount
+GO
