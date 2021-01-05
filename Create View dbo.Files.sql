@@ -2,8 +2,11 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[Files]
+
+ALTER VIEW [dbo].[Files]
+WITH SCHEMABINDING
 AS
-    SELECT DISTINCT [SourceFile]
-    from dbo.FileCount
+    SELECT 
+    DISTINCT [SourceFile]
+    FROM dbo.FileCount
 GO

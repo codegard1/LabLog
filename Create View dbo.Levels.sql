@@ -1,4 +1,10 @@
-CREATE VIEW dbo.[Levels]
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[Levels]
 AS
-SELECT DISTINCT [Level]
-FROM [LabLog].[dbo].[Logs1]
+    SELECT [Level]
+    FROM [dbo].[LevelCount]
+GO
