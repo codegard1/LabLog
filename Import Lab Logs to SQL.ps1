@@ -1,7 +1,10 @@
+# Start the timer
 $ScriptStartTime = Get-Date
 
 try {
-  Import-Module .\Invoke-SqlCmd2
+  Install-Module Invoke-SqlCmd2
+  Import-Module Invoke-SqlCmd2
+  # Import-Module "~/Invoke-Parallel/Invoke-Parallel/Invoke-Parallel.ps1"
 }
 catch {
   Write-Error "Could not import Invoke-SqlCmd2.`n$($_.Exception.Message)" 
@@ -50,10 +53,9 @@ Class LogEntry {
 
 
 # Temp storage location for log files
-$TempFolder = "..\temp"
+$TempFolder = ".\temp"
 
 # Connection variables
-# $ServerInstance = "192.168.1.225" # Plex1
 $ServerInstance = "192.168.1.207" # SQL2
 $DatabaseName = "LabLog"
 $TableNameStaging = "Logs1_Staging"
@@ -64,22 +66,22 @@ If ( $null -eq $Credential ) { $Credential = Get-Credential }
 
 # Location of Log Files
 # $LogSource = "\\192.168.1.245\Public\HyperVLab_Logs"
-$LogSource = "\\192.168.1.250\Logs2"
+# $LogSource = "\\192.168.1.250\Logs2"
+$LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2020-11*.txt" | Sort-Object Name `
-| Select-Object -First 25
+$LogFiles = Get-ChildItem $LogSource -Filter | Sort-Object LastWriteTime | Select-Object -First 100
 
 # Set up counters
 $Total = $LogFiles.Count
 $Counter = 0 
 $InsertCount = 0
 # Count total Size of all files
-$LogFileTotalLength = 0; $LogFiles | % {$LogFileTotalLength += $_.Length}
-$LogFileTotalSizeMB = ($LogFileTotalLength / 1024 / 1024)
+$LogFileTotalLength = 0; $LogFiles | % { $LogFileTotalLength += $_.Length }
+$LogFileTotalSizeMB = ($LogFileTotalLength / 1024 / 1024).ToString('0.00')
 $LengthCounter = 0
 
-Write-host "Located $Total log files" -ForegroundColor Yellow
+Write-host "Located $Total log files ($LogFileTotalSizeMB MB)" -ForegroundColor Yellow
 
 # Loop through log files 
 ForEach ($Log in $LogFiles) {
@@ -111,7 +113,7 @@ ForEach ($Log in $LogFiles) {
   # If the query returns any rows then the log file has already been imported
   If ($CheckResult.SourceFile.Count -gt 0) { 
     Write-Host "`tAlready imported. Skipping." -ForegroundColor DarkYellow
-    Continue; 
+    # Continue; 
   }
 
   # Copy log file to temp storage if not there already
@@ -182,6 +184,8 @@ ForEach ($Log in $LogFiles) {
   # Delete log from temp storage
   If ((Test-Path $LogPath)) { Remove-Item -Path $LogPath }
 
+  Continue;
+
   # Insert Staging into PROD
   If ($InsertCount -gt 0) {
     $MergeQuery = "INSERT INTO dbo.$TableNameProd
@@ -226,6 +230,6 @@ catch {
 }
 
 $ScriptEndTime = Get-Date
-$ScriptRunDuration = $ScriptEndTime - $ScriptStartTime
+$ScriptRunDuration = ($ScriptEndTime - $ScriptStartTime)
 
 Write-Host "Finished. Duration: $ScriptRunDuration. Inserts: $InsertCount"
