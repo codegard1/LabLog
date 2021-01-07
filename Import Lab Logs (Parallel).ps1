@@ -68,7 +68,7 @@ If ( $null -eq $Credential ) { $Credential = Get-Credential }
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*.txt" | Sort-Object LastWriteTime
+$LogFiles = Get-ChildItem $LogSource -Filter "*2020-12*.txt" | Sort-Object LastWriteTime | select -first 20
 
 # Set up counters
 $Total = $LogFiles.Count
@@ -84,7 +84,7 @@ Write-host "Located $Total log files ($LogFileTotalSizeMB MB)" -ForegroundColor 
 # Define log file headers
 $ColumnHeaders = @("Timestamp"; "TimeZone"; "Level"; "HostIP"; "HostName"; "Protocol"; "Message"; "SourceFile")
 
-$LogFiles | Invoke-Parallel -ImportVariables -Throttle 5 -ScriptBlock {
+$LogFiles | Invoke-Parallel -ImportVariables -Throttle 10 -ScriptBlock {
   $LogName = $_.Name
   $LogPath = "$TempFolder\$LogName"
 
@@ -136,7 +136,7 @@ $LogFiles | Invoke-Parallel -ImportVariables -Throttle 5 -ScriptBlock {
           -SqlParameters $SQLParams `
           -Credential $Credential
 
-          $InsertCount++
+        $InsertCount++
       } 
       catch {
         Write-Error $_.Exception.Message
@@ -159,6 +159,8 @@ $LogFiles | Invoke-Parallel -ImportVariables -Throttle 5 -ScriptBlock {
       Write-Error $_.Exception.Message
     }
 
+    # Delete the log file
+    If (Test-Path $LogPath) { Remove-Item -Path $LogPath }
   }
 }
 

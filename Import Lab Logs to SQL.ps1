@@ -70,7 +70,7 @@ If ( $null -eq $Credential ) { $Credential = Get-Credential }
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter | Sort-Object LastWriteTime | Select-Object -First 100
+$LogFiles = Get-ChildItem $LogSource -Filter "*2020-11*" | Sort-Object LastWriteTime | Select-Object -First 50
 
 # Set up counters
 $Total = $LogFiles.Count
@@ -113,7 +113,7 @@ ForEach ($Log in $LogFiles) {
   # If the query returns any rows then the log file has already been imported
   If ($CheckResult.SourceFile.Count -gt 0) { 
     Write-Host "`tAlready imported. Skipping." -ForegroundColor DarkYellow
-    # Continue; 
+    Continue; 
   }
 
   # Copy log file to temp storage if not there already
@@ -183,8 +183,6 @@ ForEach ($Log in $LogFiles) {
 
   # Delete log from temp storage
   If ((Test-Path $LogPath)) { Remove-Item -Path $LogPath }
-
-  Continue;
 
   # Insert Staging into PROD
   If ($InsertCount -gt 0) {
