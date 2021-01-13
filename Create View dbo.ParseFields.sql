@@ -1,25 +1,15 @@
-USE LabLog;
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW dbo.ParseFields
+CREATE VIEW [dbo].[ParseFields]
 AS
-
--- 
--- 1 Nov 19 11:28:17 DC2.stern.com MSWinEventLog	
--- 2 5	
--- 3 Security	
--- 4 22418	
--- 5 Thu Nov 19 11:28:10 2020	
--- 6 4634	
--- 7 Microsoft-Windows-Security-Auditing		
--- 8 N/A	
--- 9 Audit Success	
--- 10 DC2.stern.com	
--- 11 12545	
--- 12 An account was logged off.Subject:	
 
 Select
     A.Id
+    , A.SourceFile
+    , A.Level
     -- ,B.RetSeq
     -- ,B.RetVal
     -- , B.*
@@ -31,7 +21,7 @@ Select
     , C.Pos10 AS 'Short Message'
     , C.Pos11 AS 'Host Name'
     , C.Pos13 AS 'Message Subject'
-From dbo.Logs1 A
+From dbo.Logs1_Staging A
  Cross Apply [dbo].[udf-Str-Parse](A.Message,char(13)) B
  Cross Apply [dbo].[udf-Str-Parse-Row](B.RetVal,char(9)) C
 Where B.RetVal is not null and B.RetSeq = 1
