@@ -4,14 +4,17 @@ DECLARE @counter INT;
 DECLARE @SourceFile varchar(50);
 DECLARE @Total INT;
 
-SET @limit = 2;
+SET @limit = 5;
 SET @counter = 0
 
 -- DECLARE the cursor as a SELECT statement
 DECLARE cursor_LogFiles CURSOR
 FOR 
-SELECT [SourceFile], [Total]
-FROM [LabLog].[dbo].[FileCount]
+SELECT
+    [SourceFile]
+    , COUNT([Id]) as 'Total'
+    FROM [dbo].[Logs1_Staging]
+    GROUP BY [SourceFile]
 -- Order by date, then hostname
 ORDER BY SUBSTRING([SourceFile], 5, 10), SUBSTRING([SourceFile], 0, 4) DESC
 
