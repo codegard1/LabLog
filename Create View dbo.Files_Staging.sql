@@ -3,10 +3,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [dbo].[Files]
+CREATE VIEW [dbo].[Files_Staging]
 WITH SCHEMABINDING
 AS
     SELECT 
     DISTINCT [SourceFile]
-    FROM dbo.FileCount
+    FROM dbo.FileCount_Staging
 GO

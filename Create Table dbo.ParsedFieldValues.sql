@@ -11,7 +11,9 @@ CREATE TABLE [dbo].[ParsedFieldValues](
 	[Windows Log] [nvarchar](255) NOT NULL,
 	[Short Message] [nvarchar](255) NULL,
 	[Host Name] [nvarchar](255) NOT NULL,
-	[Message Subject] [nvarchar](255) NOT NULL
+	[Message Subject] [nvarchar](255) NOT NULL,
+	[Datestamp] [date] NOT NULL,
+	[Level] nvarchar(10) NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ParsedFieldValues] ADD PRIMARY KEY CLUSTERED 

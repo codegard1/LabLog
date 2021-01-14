@@ -10,7 +10,7 @@ AS
 SELECT
       CAST([Timestamp] AS DATE) AS DateStamp
     , COUNT_BIG(*) as Total
-FROM [dbo].[Logs1]
+FROM [dbo].[ParsedFieldValues]
 GROUP BY CAST([Timestamp] AS DATE)
 GO
 
