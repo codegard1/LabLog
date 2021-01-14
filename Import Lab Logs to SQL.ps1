@@ -62,7 +62,8 @@ $TableNameStaging = "Logs1_Staging"
 $TableNameProd = "Logs1"
 
 # Get credentials from the operator
-If ( $null -eq $Credential ) { $Credential = Get-Credential }  
+$Credential = New-Object System.Management.Automation.PSCredential -ArgumentList "chris", (Get-Content "gxddb0v.txt" | ConvertTo-SecureString)
+If ( $null -eq $Credential ) { Break; }
 
 # Location of Log Files
 # $LogSource = "\\192.168.1.245\Public\HyperVLab_Logs"
@@ -70,7 +71,7 @@ If ( $null -eq $Credential ) { $Credential = Get-Credential }
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2020-11*" | Sort-Object LastWriteTime | Select-Object -First 50
+$LogFiles = Get-ChildItem $LogSource -Filter "*2020*" | Sort-Object LastWriteTime | Select -First 125
 
 # Set up counters
 $Total = $LogFiles.Count
