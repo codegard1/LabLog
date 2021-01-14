@@ -10,6 +10,7 @@ Select
     A.Id
     , A.SourceFile
     , A.Level
+    , CAST(A.[Timestamp] AS DATE) AS Datestamp
     -- ,B.RetSeq
     -- ,B.RetVal
     -- , B.*
@@ -21,7 +22,7 @@ Select
     , C.Pos10 AS 'Short Message'
     , C.Pos11 AS 'Host Name'
     , C.Pos13 AS 'Message Subject'
-From dbo.Logs1_Staging A
+From dbo.Staging A
  Cross Apply [dbo].[udf-Str-Parse](A.Message,char(13)) B
  Cross Apply [dbo].[udf-Str-Parse-Row](B.RetVal,char(9)) C
 Where B.RetVal is not null and B.RetSeq = 1

@@ -9,10 +9,9 @@ AS
     SELECT 
     [Level]
     , COUNT_BIG(*) as 'Total'
-    FROM [dbo].[Logs1]
+    FROM [dbo].[ParsedFieldValues]
     GROUP BY [Level]
 GO
-
 
 -- CREATE INDEX
 CREATE UNIQUE CLUSTERED INDEX IX_LevelCount_Level ON [dbo].[LevelCount] ([Level] ASC) /*Change sort order as needed*/

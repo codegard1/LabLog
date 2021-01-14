@@ -3,16 +3,16 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [dbo].[FileCount]
+CREATE VIEW [dbo].[FileCount_Staging]
 WITH SCHEMABINDING
 AS
 SELECT
     [SourceFile]
     , COUNT_BIG(*) as 'Total'
-    FROM [dbo].[ParsedFieldValues]
+    FROM [dbo].[Staging]
     GROUP BY [SourceFile]
 GO
 
 -- create index
-CREATE UNIQUE CLUSTERED INDEX IX_FileCount_SourceFile ON [dbo].[FileCount] ([SourceFile] ASC)
+CREATE UNIQUE CLUSTERED INDEX IX_FileCount_SourceFile ON [dbo].[FileCount_Staging] ([SourceFile] ASC)
 GO

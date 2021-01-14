@@ -1,9 +1,6 @@
 
-
-
-
 CREATE TRIGGER dbo.[OnInsertStaging]
-ON dbo.[Logs1_Staging]
+ON dbo.[Staging]
 AFTER INSERT AS 
 
 IF @@ROWCOUNT

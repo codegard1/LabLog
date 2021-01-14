@@ -7,14 +7,14 @@ CREATE VIEW [dbo].[TotalCount]
 AS
 
     SELECT
-    'Logs1' as 'Table'
+    'ParsedFieldValues' as 'Table'
     , COUNT_BIG(*) as Total
-    FROM [LabLog].[dbo].[Logs1]
+    FROM [LabLog].[dbo].[ParsedFieldValues]
 
     UNION ALL
 
     SELECT
-    'Logs1_Staging' as 'Table'
+    'Staging' as 'Table'
     , COUNT_BIG(*) as Total
-    FROM [LabLog].[dbo].[Logs1_Staging]
+    FROM [LabLog].[dbo].[Staging]
 GO

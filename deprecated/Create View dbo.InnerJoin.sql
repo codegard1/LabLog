@@ -1,4 +1,4 @@
-CREATE VIEW dbo.InnerJoin
+ALTER VIEW dbo.InnerJoin
 WITH SCHEMABINDING
 AS
 SELECT 
@@ -13,7 +13,7 @@ SELECT
     , b.[Short Message]
     , b.[Host Name]
     , b.[Message Subject]
-  FROM [dbo].[Logs1] a
+  FROM [dbo].[Staging] a
   INNER JOIN [dbo].[ParsedFieldValues] b
   ON a.Id = b.Id
 GO
