@@ -51,15 +51,13 @@ Class LogEntry {
   }
 }
 
-
 # Temp storage location for log files
 $TempFolder = ".\temp"
 
 # Connection variables
 $ServerInstance = "192.168.1.207" # SQL2
 $DatabaseName = "LabLog"
-$TableNameStaging = "Logs1_Staging"
-$TableNameProd = "Logs1"
+$TableNameStaging = "Staging"
 
 # Get credentials from the operator
 $Credential = New-Object System.Management.Automation.PSCredential -ArgumentList "chris", (Get-Content "gxddb0v.txt" | ConvertTo-SecureString)
@@ -71,12 +69,13 @@ If ( $null -eq $Credential ) { Break; }
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2020*" | Sort-Object LastWriteTime | Select -First 125
+$LogFiles = Get-ChildItem $LogSource -Filter "*2020*" | Sort-Object LastWriteTime | Select -First 20
 
 # Set up counters
 $Total = $LogFiles.Count
 $Counter = 0 
 $InsertCount = 0
+
 # Count total Size of all files
 $LogFileTotalLength = 0; $LogFiles | % { $LogFileTotalLength += $_.Length }
 $LogFileTotalSizeMB = ($LogFileTotalLength / 1024 / 1024).ToString('0.00')
@@ -104,7 +103,7 @@ ForEach ($Log in $LogFiles) {
   $LengthCounter += $Log.Length
   
   # Check to see if the Log File has already been imported
-  $CheckQuery = "SELECT TOP 1 * FROM [dbo].[Files] WHERE [SourceFile] = '$LogName'"
+  $CheckQuery = "SELECT TOP 1 [SourceFile],[Total] FROM [dbo].[FileCount_Staging] WHERE [SourceFile] = '$LogName'"
   $CheckResult = Invoke-Sqlcmd2 `
     -ServerInstance $ServerInstance `
     -Database $DatabaseName `
@@ -112,7 +111,7 @@ ForEach ($Log in $LogFiles) {
     -Credential $Credential
 
   # If the query returns any rows then the log file has already been imported
-  If ($CheckResult.SourceFile.Count -gt 0) { 
+  If ($null -ne $CheckResult) { 
     Write-Host "`tAlready imported. Skipping." -ForegroundColor DarkYellow
     Continue; 
   }
@@ -182,50 +181,23 @@ ForEach ($Log in $LogFiles) {
       -Id 2
   }
 
-  # Delete log from temp storage
-  If ((Test-Path $LogPath)) { Remove-Item -Path $LogPath }
-
-  # Insert Staging into PROD
-  If ($InsertCount -gt 0) {
-    $MergeQuery = "INSERT INTO dbo.$TableNameProd
-    SELECT 
-      [Timestamp]
-        , [TimeZone]
-        , [Level]
-        , [HostIP]
-        , [HostName]
-        , [Protocol]
-        , [Message]
-        , [SourceFile]
-    FROM dbo.$TableNameStaging
-    WHERE [SourceFile] = '$LogName' 
-    ORDER BY [Id]"
+  # Parse message and insert to ParsedFieldValues using StoredProc
+  # try {  
+  #   Invoke-Sqlcmd2 `
+  #     -ServerInstance $ServerInstance `
+  #     -Database $DatabaseName `
+  #     -Credential $Credential `
+  #     -Query "EXECUTE [dbo].[ParseLogFile] '$LogName'"
     
-    try {  
-      Invoke-Sqlcmd2 `
-        -ServerInstance $ServerInstance `
-        -Database $DatabaseName `
-        -Query $MergeQuery `
-        -Credential $Credential
-      Write-Host "`tCopied $RowCount new rows from Staging to PROD"
-    } 
-    catch {
-      Write-Error $_.Exception.Message
-    }
-  }
-}
+  #   Write-Host "`tCopied $RowCount new rows from Staging to PROD"
+     
+  #   # Delete log from temp storage
+  #   If ((Test-Path $LogPath)) { Remove-Item -Path $LogPath }
+  # } 
+  # catch {
+  #   Write-Error $_.Exception.Message
+  # }
 
-# Truncate Staging table
-try {  
-  Invoke-Sqlcmd2 `
-    -ServerInstance $ServerInstance `
-    -Database $DatabaseName `
-    -Query "TRUNCATE TABLE dbo.Logs1_Staging" `
-    -Credential $Credential
-  Write-Host "Truncated dbo.Logs1_Staging" -ForegroundColor Yellow
-} 
-catch {
-  Write-Error $_.Exception.Message
 }
 
 $ScriptEndTime = Get-Date
