@@ -13,6 +13,3 @@ SELECT
     GROUP BY [SourceFile]
 GO
 
--- create index
-CREATE UNIQUE CLUSTERED INDEX IX_FileCount_SourceFile ON [dbo].[FileCount_Staging] ([SourceFile] ASC)
-GO
