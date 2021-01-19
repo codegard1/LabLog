@@ -2,18 +2,22 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
+DROP TABLE IF EXISTS [dbo].[ParsedFieldValues]
+GO
+
 CREATE TABLE [dbo].[ParsedFieldValues](
 	[Id] [int] NOT NULL,
-	[SourceFile] [varchar](50) NOT NULL,
-	[Category] [nvarchar](255) NOT NULL,
-	[TimeStamp] [nvarchar](255) NOT NULL,
-	[EventID] [int] NOT NULL,
-	[Windows Log] [nvarchar](255) NOT NULL,
+	[SourceFile] [nvarchar](255) NOT NULL,
+	[Category] [nvarchar](255) NULL,
+	[Level] [nvarchar](255) NULL,
+	-- [DateStamp] [date] NULL,
+	[TimeStamp] [nvarchar](255) NULL,
+	[EventID] [nvarchar](255) NULL,
+	[Windows Log] [nvarchar](255) NULL,
 	[Short Message] [nvarchar](255) NULL,
-	[Host Name] [nvarchar](255) NOT NULL,
-	[Message Subject] [nvarchar](255) NOT NULL,
-	[Datestamp] [date] NOT NULL,
-	[Level] nvarchar(10) NOT NULL
+	[Host Name] [nvarchar](255) NULL,
+	[Message Subject] [nvarchar](max) NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ParsedFieldValues] ADD PRIMARY KEY CLUSTERED 
