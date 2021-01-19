@@ -1,11 +1,14 @@
+USE LabLog;
+GO
+
 -- VARIABLES
 DECLARE @limit INT;
 DECLARE @counter INT;
 DECLARE @SourceFile varchar(50);
 DECLARE @Total INT;
 
-SET @limit = 1;
-SET @counter = 0
+SET @limit = 10;
+SET @counter = 0;
 
 -- DECLARE the cursor as a SELECT statement
 DECLARE cursor_LogFiles CURSOR
