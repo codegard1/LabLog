@@ -52,7 +52,10 @@ Class LogEntry {
 }
 
 # Temp storage location for log files
-$TempFolder = ".\temp"
+$TempFolder = "temp"
+
+# Create Temp Folder if it does not exist
+If( !(Test-Path $TempFolder) ){ mkdir $TempFolder}
 
 # Connection variables
 $ServerInstance = "192.168.1.207" # SQL2
@@ -69,7 +72,7 @@ If ( $null -eq $Credential ) { Break; }
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2020*" | Sort-Object LastWriteTime | Select -First 10
+$LogFiles = Get-ChildItem $LogSource -Filter "*2020*" | Sort-Object LastWriteTime | Select-Object -First 20
 
 # Set up counters
 $Total = $LogFiles.Count
@@ -103,7 +106,7 @@ ForEach ($Log in $LogFiles) {
   $LengthCounter += $Log.Length
   
   # Check to see if the Log File has already been imported
-  $CheckQuery = "SELECT TOP 1 [SourceFile] FROM [dbo].[Staging] WHERE [SourceFile] = '$LogName'"
+  $CheckQuery = "SELECT TOP 1 [SourceFile] FROM [dbo].[FileCount_Staging] WHERE [SourceFile] = '$LogName'"
   $CheckResult = Invoke-Sqlcmd2 `
     -ServerInstance $ServerInstance `
     -Database $DatabaseName `
@@ -118,8 +121,14 @@ ForEach ($Log in $LogFiles) {
 
   # Copy log file to temp storage if not there already
   If (!(Test-Path $LogPath)) {
-    Copy-Item -Path $Log.FullName -Destination $TempFolder
-    Write-Host "`tCopied $LogName to temp folder"-ForegroundColor Cyan
+    try{
+      Copy-Item -Path $Log.FullName -Destination $TempFolder
+      Write-Host "`tCopied $LogName to temp folder"-ForegroundColor Cyan
+    }
+    catch {
+      Write-Error $_.Exception.Message
+      Continue;
+    }
   }
 
   # Define log file headers
@@ -175,7 +184,7 @@ ForEach ($Log in $LogFiles) {
     
     # Display Progess Bar
     Write-Progress `
-      -Activity "Inserting Rows to $TableNameStaging" `
+      -Activity "Inserting Rows to $TableNameStaging from $LogName" `
       -Status "Row $RowCounter of $RowCount" `
       -PercentComplete (($RowCounter / $RowCount) * 100) `
       -Id 2
