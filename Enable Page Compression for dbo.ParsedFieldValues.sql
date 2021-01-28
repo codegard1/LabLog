@@ -1,0 +1,9 @@
+USE [LabLog]
+GO
+
+ALTER TABLE [dbo].[ParsedFieldValues] REBUILD PARTITION = ALL
+WITH 
+(
+	DATA_COMPRESSION = PAGE
+)
+GO
