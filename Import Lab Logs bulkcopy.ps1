@@ -1,4 +1,4 @@
-Install-Module Invoke-SqlCmd2 -ErrorAction Stop
+Install-Module Invoke-SqlCmd2 -ErrorAction Stop -Scope CurrentUser
 Import-Module Invoke-SqlCmd2 -ErrorAction Stop
 
 # Start the timer (whole script)
@@ -139,7 +139,7 @@ ForEach ($Log in $LogFiles) {
   $ColumnHeaders = @("Timestamp"; "TimeZone"; "Level"; "HostIP"; "HostName"; "Protocol"; "Message")
     
   # Import log as CSV
-  $CSV = Import-Csv -Path $LogPath -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop
+  $CSV = Import-Csv -Path $LogPath -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop | Select "Timestamp","Level","Message"
    
   # Counters for the log file
   $RowCount = $CSV.count
@@ -170,23 +170,23 @@ ForEach ($Log in $LogFiles) {
 
   # Create the datatable, and manually add columns
   $datatable = New-Object System.Data.DataTable 
-  $null = $datatable.Columns.Add("HostIP", [String])
-  $null = $datatable.Columns.Add("HostName", [String])
+  $null = $datatable.Columns.Add("Timestamp", [DateTime])
   $null = $datatable.Columns.Add("Level", [String])
   $null = $datatable.Columns.Add("Message", [String])
-  $null = $datatable.Columns.Add("Protocol", [String])
   $null = $datatable.Columns.Add("SourceFile", [String])
-  $null = $datatable.Columns.Add("Timestamp", [DateTime])
-  $null = $datatable.Columns.Add("TimeZone", [String])
+  # $null = $datatable.Columns.Add("HostIP", [String])
+  # $null = $datatable.Columns.Add("HostName", [String])
+  # $null = $datatable.Columns.Add("Protocol", [String])
+  # $null = $datatable.Columns.Add("TimeZone", [String])
   # Add column mappings
-  $null = $bulkcopy.ColumnMappings.Add("HostIP", "HostIP")
-  $null = $bulkcopy.ColumnMappings.Add("HostName", "HostName")
+  $null = $bulkcopy.ColumnMappings.Add("Timestamp", "Timestamp")
   $null = $bulkcopy.ColumnMappings.Add("Level", "Level")
   $null = $bulkcopy.ColumnMappings.Add("Message", "Message")
-  $null = $bulkcopy.ColumnMappings.Add("Protocol", "Protocol")
   $null = $bulkcopy.ColumnMappings.Add("SourceFile", "SourceFile")
-  $null = $bulkcopy.ColumnMappings.Add("Timestamp", "Timestamp")
-  $null = $bulkcopy.ColumnMappings.Add("TimeZone", "TimeZone")
+  # $null = $bulkcopy.ColumnMappings.Add("HostIP", "HostIP")
+  # $null = $bulkcopy.ColumnMappings.Add("HostName", "HostName")
+  # $null = $bulkcopy.ColumnMappings.Add("Protocol", "Protocol")
+  # $null = $bulkcopy.ColumnMappings.Add("TimeZone", "TimeZone")
 
   Write-Host "`tImporting $LogName ($RowCount Rows)" -ForegroundColor Cyan
 
