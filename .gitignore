@@ -1,4 +1,5 @@
 ETL/temp/*
+ETL/compressed/*
 gxddb0v.txt
 workspace.code-workspace
 .vs/LabLog/v15/.ssms_suo
