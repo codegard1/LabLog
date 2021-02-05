@@ -73,7 +73,7 @@ $BatchSize = 10000
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2021*" | Sort-Object LastWriteTime | Select-Object -First 55
+$LogFiles = Get-ChildItem $LogSource -Filter "*2021*" | Sort-Object LastWriteTime
 
 # Set up counters
 $Total = $LogFiles.Count
