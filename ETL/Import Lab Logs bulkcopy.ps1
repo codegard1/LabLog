@@ -8,47 +8,6 @@ $ScriptDuration = [System.Diagnostics.Stopwatch]::StartNew()
 [void][Reflection.Assembly]::LoadWithPartialName("System.Data") 
 [void][Reflection.Assembly]::LoadWithPartialName("System.Data.SqlClient") 
 
-# Class definitions (unused)
-Class LogCollection {
-  # Props
-  [LogEntry[]]$Data
-
-  # Constructor
-  LogCollection([Array]$CSVData) {
-    ForEach ( $Row in $CSVData) {
-      try {
-        $This.Data += [LogEntry]::new($Row)
-      }
-      catch {
-        Write-Error $_.Exception.Message
-        Continue;
-      }
-    }
-  }
-}
-
-Class LogEntry {
-  # Props
-  [DateTime]$Timestamp;
-  [String]$TimeZone;
-  [String]$Level;
-  [String]$HostIP;
-  [String]$HostName;
-  [String]$Protocol;
-  [String]$Message;
-
-  # Constructor
-  LogEntry([Object]$Row) {
-    $This.Timestamp = $Row.Timestamp;
-    $This.TimeZone = $Row.TimeZone;
-    $This.Level = $Row.Level;
-    $This.HostIP = $Row.HostIP;
-    $This.HostName = $Row.HostName;
-    $This.Protocol = $Row.Protocol;
-    $This.Message = $Row.Message;
-  }
-}
-
 # Temp storage location for log files
 $TempFolder = "temp"
 
@@ -73,7 +32,7 @@ $BatchSize = 10000
 $LogSource = "/mnt/Logs2"
 
 # Get subset of Log files
-$LogFiles = Get-ChildItem $LogSource -Filter "*2021*" | Sort-Object LastWriteTime
+$LogFiles = Get-ChildItem $LogSource | Sort-Object LastWriteTime
 
 # Set up counters
 $Total = $LogFiles.Count
@@ -139,7 +98,7 @@ ForEach ($Log in $LogFiles) {
   $ColumnHeaders = @("Timestamp"; "TimeZone"; "Level"; "HostIP"; "HostName"; "Protocol"; "Message")
     
   # Import log as CSV
-  $CSV = Import-Csv -Path $LogPath -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop | Select "Timestamp","Level","Message"
+  $CSV = Import-Csv -Path $LogPath -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop | Select "Timestamp", "Level", "Message"
    
   # Counters for the log file
   $RowCount = $CSV.count
@@ -254,9 +213,14 @@ ForEach ($Log in $LogFiles) {
   
 
 # Clean Up 
-$bulkcopy.Close()
-$bulkcopy.Dispose() 
-$sqlConnection.Dispose()
+try {
+  $bulkcopy.Close()
+  $bulkcopy.Dispose()
+  $sqlConnection.Dispose()
+}
+catch {
+  # Oh well
+}
 
 [System.GC]::Collect()
 
