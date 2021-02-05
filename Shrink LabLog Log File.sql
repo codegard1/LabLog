@@ -1,0 +1,4 @@
+USE [LabLog]
+GO
+DBCC SHRINKFILE (N'LabLog_log' , 1024)
+GO
