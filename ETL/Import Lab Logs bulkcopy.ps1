@@ -8,6 +8,9 @@ $ScriptDuration = [System.Diagnostics.Stopwatch]::StartNew()
 [void][Reflection.Assembly]::LoadWithPartialName("System.Data") 
 [void][Reflection.Assembly]::LoadWithPartialName("System.Data.SqlClient") 
 
+# Read from Zip files
+Add-Type -Assembly System.IO.Compression.Filesystem
+
 # Temp storage location for log files
 $TempFolder = "temp"
 
@@ -29,7 +32,8 @@ $TableNameStaging = "Staging"
 $BatchSize = 10000
 
 # Location of Log Files
-$LogSource = "/mnt/Logs2"
+# $LogSource = "/mnt/Logs2"
+$LogSource = "ETL/compressed"
 
 # Get subset of Log files
 $LogFiles = Get-ChildItem $LogSource | Sort-Object LastWriteTime
@@ -52,8 +56,9 @@ ForEach ($Log in $LogFiles) {
   # Start the timer (per log)
   $LogDuration = [System.Diagnostics.Stopwatch]::StartNew()  
 
-  $LogName = $Log.Name
-  $LogPath = "$TempFolder\$LogName"
+  $LogName = $Log.Name 
+  # $LogName = $Log.Name -replace ".zip",""
+  $LogPath = "$TempFolder/$LogName"
   
   Write-Host $LogName -ForegroundColor Yellow
   
@@ -97,11 +102,27 @@ ForEach ($Log in $LogFiles) {
   # Define log file headers
   $ColumnHeaders = @("Timestamp"; "TimeZone"; "Level"; "HostIP"; "HostName"; "Protocol"; "Message")
     
+  # Open the archive, then open the entry for the log file
+  $zip = [io.compression.zipfile]::OpenRead($LogPath)
+  $file = $zip.Entries | where-object { $_.Name -eq ($Logname -replace ".zip","") }
+  $stream = $file.Open()
+
+  # Read content of the log file into a variable
+  $reader = New-Object IO.StreamReader($stream)
+  $CSVString = $reader.ReadToEnd()
+
   # Import log as CSV
-  $CSV = Import-Csv -Path $LogPath -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop | Select "Timestamp", "Level", "Message"
-   
+  $CSVArray = $CSVString | ConvertFrom-Csv -Delimiter "|" -Header $ColumnHeaders
+  
+  # $CSV = $text | Import-Csv -Encoding UTF8 -Delimiter "|" -Header $ColumnHeaders -ErrorAction Stop # | Select "Timestamp", "Level", "Message" 
+
+  $reader.Close()
+  $stream.Close()
+  $zip.Dispose()
+  
+  
   # Counters for the log file
-  $RowCount = $CSV.count
+  $RowCount = $CSVArray.count
   $RowCounter = 0
 
 
@@ -153,7 +174,7 @@ ForEach ($Log in $LogFiles) {
   $datatable.Clear()
 
   # Enumerate the SourceData
-  $Enum = $CSV.GetEnumerator()
+  $Enum = $CSVArray.GetEnumerator()
   While ($Enum.MoveNext()) {
     $CurrentRow = $Enum.Current
 

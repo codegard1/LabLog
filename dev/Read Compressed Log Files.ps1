@@ -18,5 +18,5 @@ $text = $reader.ReadToEnd()
 
 # Clean up 
 $reader.Close()
-$stream.Close()
+$stream.Close()\
 $zip.Dispose()
